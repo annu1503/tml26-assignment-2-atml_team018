@@ -1,0 +1,7 @@
+torch
+torchvision
+safetensors
+pandas
+numpy
+tqdm
+requests
