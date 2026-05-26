@@ -1,4 +1,4 @@
-# tml26-assignment-2-atml_team018
+# tml26-assignment-2-team_XIX
 # Stolen Model Detection — TML26 Task 2
 **Team:** atml_team018  
 **Best leaderboard score:** 0.6111 (TPR@5%FPR)
