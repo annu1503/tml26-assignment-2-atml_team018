@@ -47,19 +47,9 @@ This will:
 - Save progress to `checkpoint_v5.csv` (safe to interrupt and resume)
 - Write final scores to `submission.csv`
 
-Runtime: ~15–30 min per model on CPU, much faster with GPU.
 
 ### 5. Submit
 Update `FILE_PATH` in `submission.py` to point to your `submission.csv`, then run:
 ```bash
 python submission.py
 ```
-
-## Approach
-The detection combines three signal groups:
-
-- **Weight-space (50%):** Global cosine similarity, layer-wise cosine mean/min, near-identical layer fraction, L2 distance, BatchNorm stats cosine. Catches direct copies and fine-tuned models.
-- **Output-space (35%):** KL divergence (standard + temperature-scaled), prediction agreement, top-3 overlap, logit cosine, probability rank correlation. Catches distilled and knockoff models.
-- **Activation-space CKA (15%):** Linear CKA at layer1–layer4. Catches models with shared internal representations even when weights differ.
-
-Final score = 60% weighted linear combination + 40% Borda rank fusion across all signals.
