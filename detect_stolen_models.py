@@ -13,10 +13,7 @@ from torch.utils.data import DataLoader, Subset
 
 from safetensors.torch import load_file
 
-
-# ============================================================
 # CONFIG
-# ============================================================
 
 DEVICE = "cpu"
 
@@ -28,16 +25,13 @@ DATA_ROOT = "./cifar100"
 SUBSET_SIZE = 1024
 BATCH_SIZE = 128
 
-# 🔥 MULTI-NOISE ROBUSTNESS
+# MULTI-NOISE ROBUSTNESS
 NOISE_LEVELS = [0.02, 0.05, 0.10]
 
 OUTPUT_CSV = "submission.csv"
 
 
-# ============================================================
 # MODEL
-# ============================================================
-
 def make_model():
 
     model = resnet18(weights=None)
@@ -79,11 +73,7 @@ def load_model(path):
 
     return model
 
-
-# ============================================================
 # DATA
-# ============================================================
-
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(
@@ -92,11 +82,7 @@ transform = transforms.Compose([
     )
 ])
 
-
-# ============================================================
 # HARD SAMPLE SELECTION
-# ============================================================
-
 def get_loader():
 
     dataset = datasets.CIFAR100(
@@ -159,11 +145,7 @@ def get_loader():
 
     return loader
 
-
-# ============================================================
 # PREDICTIONS
-# ============================================================
-
 def collect_predictions(model, loader):
 
     preds = []
@@ -180,11 +162,7 @@ def collect_predictions(model, loader):
 
     return torch.cat(preds)
 
-
-# ============================================================
 # MULTI-NOISE ROBUSTNESS
-# ============================================================
-
 def noisy_stability(model, loader):
 
     stabilities = []
@@ -242,10 +220,7 @@ def noisy_stability(model, loader):
 
     return float(np.mean(stabilities))
 
-
-# ============================================================
 # AGREEMENT
-# ============================================================
 
 def prediction_agreement(a, b):
 
@@ -253,11 +228,7 @@ def prediction_agreement(a, b):
         a == b
     ).float().mean().item()
 
-
-# ============================================================
 # CONFIDENCE SIGNAL
-# ============================================================
-
 def confidence_similarity(
     model_a,
     model_b,
@@ -300,11 +271,7 @@ def confidence_similarity(
         conf_b.unsqueeze(0),
     ).item()
 
-
-# ============================================================
 # NORMALIZATION
-# ============================================================
-
 def normalize(values):
 
     values = np.array(values)
@@ -314,11 +281,7 @@ def normalize(values):
         / (values.max() - values.min() + 1e-8)
     )
 
-
-# ============================================================
 # MAIN
-# ============================================================
-
 def main():
 
     print("Preparing dataloader...")
@@ -370,19 +333,13 @@ def main():
             loader,
         )
 
-        # ============================================
         # AGREEMENT
-        # ============================================
-
         agreement = prediction_agreement(
             target_preds,
             suspect_preds,
         )
 
-        # ============================================
         # ROBUSTNESS GAP
-        # ============================================
-
         suspect_stability = noisy_stability(
             suspect_model,
             loader,
@@ -393,20 +350,14 @@ def main():
             - suspect_stability
         )
 
-        # ============================================
         # CONFIDENCE MATCH
-        # ============================================
-
         conf_sim = confidence_similarity(
             target_model,
             suspect_model,
             loader,
         )
 
-        # ============================================
         # FINAL SCORE
-        # ============================================
-
         score = (
             0.55 * agreement +
             0.30 * robustness_gap +
@@ -420,10 +371,7 @@ def main():
 
         del suspect_model
 
-    # ========================================================
     # SAVE
-    # ========================================================
-
     df = pd.DataFrame(rows)
 
     df["score"] = normalize(
@@ -444,10 +392,6 @@ def main():
         ).head(10)
     )
 
-
-# ============================================================
 # ENTRY
-# ============================================================
-
 if __name__ == "__main__":
     main()
